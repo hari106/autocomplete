@@ -1,10 +1,14 @@
-import { AddToCache, GetFromCache } from "./caching";
+import { AddToCache, GetFromCache, InitCache } from "./caching";
 //This guy will fetch results and put it into a JSON response
 
 //states are not to be confused with http but fetch behavior results
 export const FStates = {
     ERR: '-1',
-    OK: '0'
+    OK: '0',
+}
+
+export function InitAndClearCache() {
+    InitCache();
 }
 
 export function FetchGitUsers(query, callback) {
@@ -14,7 +18,7 @@ export function FetchGitUsers(query, callback) {
     if (cachedRes.length > 0) {
         callback(FStates.OK, cachedRes);
     } else {
-        fetch(`https://api.github.com/search/users?q=${query}`, {
+        fetch(`https://api.github.com/search/users?q=${query}&per_page=100`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/vnd.github.v3+json",
@@ -24,9 +28,14 @@ export function FetchGitUsers(query, callback) {
                 return response.json();
             })
             .then((jsonResponse) => {
-                //fill up user info
-                AddToCache(query, jsonResponse['items']);
-                callback(FStates.OK, jsonResponse['items']);
+                if ('message' in jsonResponse) {
+                    callback(FStates.ERR, jsonResponse['message'])
+                } else {
+                    //fill up user info
+                    AddToCache(query, jsonResponse['items']);
+                    callback(FStates.OK, jsonResponse['items']);
+                }
+
             })
             .catch((error) => {
                 callback(FStates.ERR, error);
@@ -34,4 +43,3 @@ export function FetchGitUsers(query, callback) {
     }
 
 }
-

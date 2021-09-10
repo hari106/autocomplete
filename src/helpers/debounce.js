@@ -1,4 +1,4 @@
-const debounce = function(func, timeout = 800) {
+const debounce = function(func, timeout = 500) {
     var timer;
 
     return (...args) => {

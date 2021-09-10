@@ -1,7 +1,7 @@
 import React from "react";
 import UserProfiles from "./UserProfiles";
 import debounce from "../helpers/debounce";
-import { FetchGitUsers, FStates } from "../helpers/fetcher";
+import { InitAndClearCache, FetchGitUsers, FStates } from "../helpers/fetcher";
 
 import "../css/SearchBar.css";
 
@@ -14,32 +14,40 @@ class SearchBar extends React.Component {
         this.queryResults = this.queryResults.bind(this);
     }
 
+    componentDidMount() {
+        InitAndClearCache();
+    }
+
     queryResults(e) {
         //communicate with github API and get results
         const query = e.target.value;
 
         if (query.trim() === '') {
+            this.setState({
+                loading: false,
+                userList: [],
+            });
             return;
         }
 
         this.setState({
-            queryText: query
+            queryText: query, 
+            loading: true
         });
-        this.setState({ loading: true });
+        
+        FetchGitUsers(query, (state, data) => {
+            switch (state) {
+                case FStates.OK: //fill up user info
+                    this.setState({
+                        loading: false,
+                        userList: data
+                    });
+                    break;
 
-        //use a timer to count number of requests and queue requests
-
-        FetchGitUsers(query, (state, userlist) => {
-            if (state === FStates.OK) {
-                //fill up user info
-                this.setState({
-                    loading: false,
-                    userList: userlist
-                });
-            }
-            else if (state === FStates.ERR) {
-                alert(state);
-                this.setState({ loading: false });
+                case FStates.ERR:
+                    alert(data);
+                    this.setState({ loading: false });
+                    break;
             }
         });
     }

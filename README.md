@@ -1,6 +1,15 @@
-# Getting Started with Create React App
+# Autocomplete with React
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### What is present
+- Takes search input and queries GitHub search API to build a box of user results
+- Added debouncing to input control
+- Cache control in two layers: in-memory and localStorage which will get periodically cleared (currently at 1 hour)
+
+### What needs to be added
+- Throttling requests (current API calls are limited to 10 per minute for unauthorized users)
+- Lazy loading of results
+- Add more states to input (query completion, browsing results via keystrokes)
+- Add more information regarding users
 
 ## Available Scripts
 
